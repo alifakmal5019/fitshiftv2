@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitShift">
+<title>FitShift — Dr Alif's Training App</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#181818;--bg4:#222222;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);
+  --text:#f0f0f0;--text2:#888;--text3:#555;
+  --green:#00d68f;--green-dim:rgba(0,214,143,0.12);
+  --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+  --red:#ff5c5c;--red-dim:rgba(255,92,92,0.12);
+  --blue:#4fa3ff;--blue-dim:rgba(79,163,255,0.12);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --ff:'Inter', system-ui, sans-serif;--fm:'Roboto Mono', monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--ff);min-height:100vh;overflow-x:hidden;}
+
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity 0.5s;}
+#splash.gone{opacity:0;pointer-events:none;}
+.splash-logo{font-size:72px;margin-bottom:16px;animation:pulse 1.5s ease-in-out infinite;}
+.splash-name{font-size:28px;font-weight:800;letter-spacing:-0.5px;color:var(--green);}
+.splash-sub{font-size:13px;color:var(--text2);margin-top:6px;font-family:var(--fm);}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+.header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:calc(var(--safe-top) + 12px) 20px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.header-title{font-size:18px;font-weight:800;letter-spacing:-0.3px;}
+.header-title span{color:var(--green);}
+.header-sub{font-size:11px;color:var(--text2);font-family:var(--fm);margin-top:2px;}
+.energy-pill{background:var(--green-dim);border:0.5px solid var(--green);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--green);font-family:var(--fm);cursor:pointer;white-space:nowrap;}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid var(--border);padding:8px 0 calc(var(--safe-bottom) + 8px);display:flex;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;}
+.nav-icon{font-size:20px;opacity:0.4;transition:all 0.2s;}
+.nav-label{font-size:10px;color:var(--text2);font-family:var(--fm);font-weight:500;letter-spacing:0.03em;opacity:0.5;transition:all 0.2s;}
+.nav-item.active .nav-icon{opacity:1;transform:translateY(-2px);}
+.nav-item.active .nav-label{color:var(--green);opacity:1;}
+
+.content{padding:16px 16px calc(90px + var(--safe-bottom));min-height:100vh;}
+.screen{display:none;}
+.screen.active{display:block;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;}
+.sec-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--fm);margin:20px 0 10px;}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--fm);}
+.b-green{background:var(--green-dim);color:var(--green);border:0.5px solid rgba(0,214,143,0.3);}
+.b-amber{background:var(--amber-dim);color:var(--amber);border:0.5px solid rgba(245,166,35,0.3);}
+.b-red{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(255,92,92,0.3);}
+.b-blue{background:var(--blue-dim);color:var(--blue);border:0.5px solid rgba(79,163,255,0.3);}
+.b-purple{background:var(--purple-dim);color:var(--purple);border:0.5px solid rgba(167,139,250,0.3);}
+.b-gray{background:var(--bg4);color:var(--text2);border:0.5px solid var(--border);}
+.tip{border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:13px;line-height:1.6;font-family:var(--fm);border:0.5px solid;}
+.tip-green{background:var(--green-dim);border-color:rgba(0,214,143,0.25);color:#7ee8c0;}
+.tip-amber{background:var(--amber-dim);border-color:rgba(245,166,35,0.25);color:#f0c070;}
+.tip-red{background:var(--red-dim);border-color:rgba(255,92,92,0.25);color:#ff9090;}
+.tip-blue{background:var(--blue-dim);border-color:rgba(79,163,255,0.25);color:#90c4ff;}
+
+/* DECIDER */
+.score-hero{text-align:center;padding:24px 0 8px;}
+.score-num{font-size:96px;font-weight:800;line-height:1;letter-spacing:-4px;transition:color 0.3s;}
+.score-label{font-size:16px;font-weight:700;margin-top:4px;}
+.score-sub{font-size:13px;color:var(--text2);margin-top:4px;font-family:var(--fm);}
+.zone-bar-track{height:8px;border-radius:99px;background:linear-gradient(90deg,#ff5c5c 0%,#f5a623 35%,#00d68f 65%,#4fa3ff 100%);margin:16px 0 4px;position:relative;}
+.zone-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--text);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--green);transition:left 0.15s;}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:36px;background:transparent;cursor:pointer;padding:0;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--green);border:3px solid var(--bg2);}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--bg4);border-radius:99px;}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.result-tile{background:var(--bg3);border-radius:12px;padding:12px;border:0.5px solid var(--border);}
+.r-label{font-size:10px;color:var(--text2);font-family:var(--fm);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;}
+.r-val{font-size:13px;font-weight:700;color:var(--text);line-height:1.4;}
+.advice-box{border-radius:12px;padding:14px;margin-top:12px;font-size:13px;line-height:1.6;border:0.5px solid;font-family:var(--fm);}
+.shift-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.shift-tile{background:var(--bg3);border-radius:12px;padding:14px;border:0.5px solid var(--border);}
+.shift-rule{font-size:12px;color:var(--text2);line-height:1.5;font-family:var(--fm);margin-top:8px;}
+
+/* SESSIONS */
+.session-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;}
+.session-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.session-title{font-size:15px;font-weight:700;}
+.session-meta{font-size:12px;color:var(--text2);font-family:var(--fm);margin-top:3px;}
+.ex-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.ex-row:last-child{border-bottom:none;}
+.ex-name{font-size:13px;font-weight:500;}
+.ex-detail{font-size:11px;color:var(--text2);font-family:var(--fm);margin-top:2px;}
+.ex-sets{font-size:12px;color:var(--text2);font-family:var(--fm);white-space:nowrap;margin-left:8px;}
+.zone-filter{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;}
+.zone-filter::-webkit-scrollbar{display:none;}
+.filter-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg3);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;font-family:var(--fm);}
+.filter-btn.active{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+
+/* STATS INPUT */
+.stats-hero{background:var(--bg2);border:0.5px solid var(--green);border-radius:16px;padding:18px;margin-bottom:16px;}
+.stats-hero-title{font-size:17px;font-weight:800;margin-bottom:4px;}
+.stats-hero-sub{font-size:12px;color:var(--text2);font-family:var(--fm);line-height:1.6;}
+.input-group{margin-bottom:16px;}
+.input-group:last-child{margin-bottom:0;}
+.input-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--fm);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.input-label .lval{font-size:15px;font-weight:800;color:var(--green);font-family:var(--ff);}
+.seg-control{display:flex;background:var(--bg3);border-radius:10px;border:0.5px solid var(--border);overflow:hidden;}
+.seg-btn{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:700;font-family:var(--fm);color:var(--text2);cursor:pointer;border:none;background:transparent;transition:all 0.15s;}
+.seg-btn.active{background:var(--green-dim);color:var(--green);}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.calc-tile{background:var(--bg3);border-radius:12px;padding:12px;border:0.5px solid var(--border);text-align:center;}
+.calc-val{font-size:20px;font-weight:800;line-height:1.2;}
+.calc-label{font-size:10px;color:var(--text2);font-family:var(--fm);margin-top:4px;}
+.calc-badge{display:inline-block;font-size:10px;font-family:var(--fm);font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px;}
+.macro-bar-wrap{margin-bottom:12px;}
+.macro-bar-wrap:last-child{margin-bottom:0;}
+.macro-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;font-weight:600;}
+.macro-track{height:7px;background:var(--bg4);border-radius:99px;overflow:hidden;}
+.macro-fill{height:100%;border-radius:99px;transition:width 0.4s ease;}
+.save-btn{width:100%;padding:15px;background:var(--green);border:none;border-radius:12px;font-size:15px;font-weight:800;color:#000;font-family:var(--ff);cursor:pointer;letter-spacing:-0.3px;margin-top:4px;}
+.save-btn:active{opacity:0.8;}
+.saved-toast{display:none;text-align:center;font-size:13px;color:var(--green);font-family:var(--fm);margin-top:10px;padding:8px;background:var(--green-dim);border-radius:8px;}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px;gap:12px;}
+.status-row:last-child{border-bottom:none;}
+.status-key{color:var(--text2);font-family:var(--fm);font-size:12px;flex-shrink:0;}
+.status-val{font-weight:700;text-align:right;font-size:13px;}
+.changed-indicator{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle;}
+
+/* HR ZONES */
+.zone-row{padding:14px 0;border-bottom:0.5px solid var(--border);}
+.zone-row:last-child{border-bottom:none;}
+.zone-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.zone-name{font-size:14px;font-weight:700;}
+.zone-bpm{font-size:12px;font-family:var(--fm);color:var(--text2);}
+.zone-prog{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.zone-fill{height:100%;border-radius:99px;}
+.zone-desc{font-size:12px;color:var(--text2);font-family:var(--fm);line-height:1.5;}
+.setup-step{display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.setup-step:last-child{border-bottom:none;}
+.setup-num{width:28px;height:28px;border-radius:50%;background:var(--green-dim);color:var(--green);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.setup-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.setup-desc{font-size:12px;color:var(--text2);font-family:var(--fm);line-height:1.5;}
+
+/* WORKOUT LOG */
+.wlog-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:4px;}
+.wlog-day{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.wlog-day-label{font-size:9px;font-weight:700;color:var(--text3);font-family:var(--fm);letter-spacing:0.05em;text-transform:uppercase;}
+.wlog-btn-wrap{display:flex;flex-direction:column;gap:3px;width:100%;}
+.wlog-btn{width:100%;padding:7px 0;border-radius:8px;border:0.5px solid var(--border);background:var(--bg3);font-size:13px;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1;}
+.wlog-btn:active{transform:scale(0.92);}
+.wlog-btn.done{background:rgba(0,214,143,0.15);border-color:var(--green);}
+.wlog-btn.skip{background:rgba(255,92,92,0.12);border-color:var(--red);}
+.wlog-btn.none{opacity:0.45;}
+
+/* RECOVERY WARNINGS */
+.recovery-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border:0.5px solid;display:flex;gap:12px;align-items:flex-start;}
+.rc-red{background:var(--red-dim);border-color:rgba(255,92,92,0.3);}
+.rc-amber{background:var(--amber-dim);border-color:rgba(245,166,35,0.3);}
+.rc-green{background:var(--green-dim);border-color:rgba(0,214,143,0.3);}
+.rc-icon{font-size:22px;flex-shrink:0;line-height:1.3;}
+.rc-body{}
+.rc-title{font-size:13px;font-weight:800;margin-bottom:3px;}
+.rc-detail{font-size:12px;font-family:var(--fm);line-height:1.55;color:var(--text2);}
+.rc-red .rc-title{color:var(--red);}
+.rc-amber .rc-title{color:var(--amber);}
+.rc-green .rc-title{color:var(--green);}
+
+/* INSIGHT STATS */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.insight-tile{background:var(--bg3);border-radius:14px;padding:14px 12px;border:0.5px solid var(--border);position:relative;overflow:hidden;}
+.insight-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:99px 99px 0 0;}
+.it-green::before{background:var(--green);}
+.it-amber::before{background:var(--amber);}
+.it-red::before{background:var(--red);}
+.it-blue::before{background:var(--blue);}
+.insight-icon{font-size:18px;margin-bottom:6px;display:block;}
+.insight-val{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;}
+.insight-label{font-size:10px;color:var(--text2);font-family:var(--fm);margin-top:3px;text-transform:uppercase;letter-spacing:0.06em;}
+.insight-sub{font-size:11px;font-family:var(--fm);margin-top:5px;font-weight:600;}
+.trend-bar{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.trend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.trend-text{font-size:11px;font-family:var(--fm);color:var(--text2);}
+
+/* DRIVE SYNC */
+.drive-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);font-family:var(--fm);font-size:11px;}
+.drive-status{display:flex;align-items:center;gap:6px;color:var(--text2);}
+.drive-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s;}
+.drive-dot.connected{background:var(--green);}
+.drive-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+.drive-dot.error{background:var(--red);}
+.drive-btn{background:none;border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--fm);font-size:11px;padding:4px 10px;cursor:pointer;}
+.drive-btn:active{opacity:0.7;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-logo">⚡</div>
+  <div class="splash-name">FitShift</div>
+  <div class="splash-sub">Dr Alif's adaptive training system</div>
+</div>
+
+<div class="header">
+  <div>
+    <div class="header-title">Fit<span>Shift</span></div>
+    <div class="header-sub" id="headerDate">—</div>
+  </div>
+  <div class="energy-pill" onclick="showScreen('decider')">⚡ Energy <span id="headerEnergy">77</span></div>
+</div>
+
+<div class="drive-bar">
+  <div class="drive-status">
+    <div class="drive-dot" id="driveDot"></div>
+    <span id="driveStatusText">Not connected to Drive</span>
+  </div>
+  <button class="drive-btn" id="driveBtn" onclick="driveAction()">Connect Drive</button>
+</div>
+
+<div class="content">
+
+  <!-- ─── DECIDER ─── -->
+  <div class="screen active" id="screen-decider">
+    <div class="score-hero">
+      <div class="score-num" id="scoreNum" style="color:var(--green)">77</div>
+      <div class="score-label" id="scoreLabel" style="color:var(--green)">Good — train hard</div>
+      <div class="score-sub">Open Samsung Health → Energy score → drag below</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--fm);color:var(--text3);margin-bottom:6px;">
+        <span>0</span><span>50</span><span>100</span>
+      </div>
+      <div class="zone-bar-track"><div class="zone-thumb" id="zoneThumb" style="left:77%"></div></div>
+      <input type="range" min="0" max="100" value="77" id="energySlider" oninput="updateEnergy(+this.value)">
+    </div>
+    <div class="result-grid">
+      <div class="result-tile"><div class="r-label">Session</div><div class="r-val" id="rSession">Gym or run 6–8km</div></div>
+      <div class="result-tile"><div class="r-label">Intensity</div><div class="r-val" id="rIntensity">Full — 100%</div></div>
+      <div class="result-tile"><div class="r-label">Duration</div><div class="r-val" id="rDuration">60–75 min</div></div>
+      <div class="result-tile"><div class="r-label">Best pick</div><div class="r-val" id="rBest">Push/Pull/Legs or long run</div></div>
+    </div>
+    <div class="advice-box tip-green" id="adviceBox">Full capacity — go all in. Great day for compound lifts and distance running.</div>
+
+    <!-- ─── DAILY CHECK-IN ─── -->
+    <div class="sec-label">Daily check-in</div>
+    <div class="card">
+
+      <!-- Workout status -->
+      <div style="margin-bottom:16px;">
+        <div class="input-label" style="margin-bottom:10px;">Workout today?</div>
+        <div style="display:flex;gap:10px;">
+          <div id="checkin-done" onclick="setCheckinWorkout('done')" style="flex:1;padding:14px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg3);text-align:center;cursor:pointer;font-size:20px;transition:all 0.15s;">✅</div>
+          <div id="checkin-skip" onclick="setCheckinWorkout('skip')" style="flex:1;padding:14px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg3);text-align:center;cursor:pointer;font-size:20px;transition:all 0.15s;">❌</div>
+        </div>
+        <div id="checkin-workout-label" style="text-align:center;font-size:12px;font-family:var(--fm);color:var(--text3);margin-top:6px;">not logged yet</div>
+      </div>
+
+      <!-- Sleep quality -->
+      <div style="margin-bottom:16px;">
+        <div class="input-label" style="margin-bottom:10px;">Last night's sleep</div>
+        <div class="seg-control">
+          <div class="seg-btn" id="csleep-poor"  onclick="setCheckinSleep('poor')">Poor &lt;6h</div>
+          <div class="seg-btn" id="csleep-low"   onclick="setCheckinSleep('low')">Low ~6h</div>
+          <div class="seg-btn" id="csleep-good"  onclick="setCheckinSleep('good')">Good 7–8h</div>
+          <div class="seg-btn" id="csleep-great" onclick="setCheckinSleep('great')">Great 8h+</div>
+        </div>
+      </div>
+
+      <!-- Log button -->
+      <button class="save-btn" id="logDayBtn" onclick="logDay()">📋 Log Today</button>
+      <div class="saved-toast" id="logToast">✅ Day logged!</div>
+      <div id="checkin-already-logged" style="display:none;text-align:center;font-size:12px;font-family:var(--fm);color:var(--green);margin-top:8px;"></div>
+    </div>
+
+    <div class="sec-label">Shift override rules</div>
+    <div class="shift-grid">
+      <div class="shift-tile"><div><span class="badge b-blue">N Night</span></div><div class="shift-rule">Never train day of night shift. Sleep first — always.</div></div>
+      <div class="shift-tile"><div><span class="badge b-green">M Morning</span></div><div class="shift-rule">Train 4–6PM after shift. Check energy at 3:30PM.</div></div>
+      <div class="shift-tile"><div><span class="badge b-amber">E Evening</span></div><div class="shift-rule">Train 9–10:30AM. 3h buffer before 2PM shift.</div></div>
+      <div class="shift-tile"><div><span class="badge b-purple">Off day</span></div><div class="shift-rule">Best training days. 7AM–12PM. Energy score governs intensity.</div></div>
+    </div>
+  </div>
+
+  <!-- ─── SESSIONS ─── -->
+  <div class="screen" id="screen-sessions">
+    <div class="zone-filter">
+      <div class="filter-btn active" onclick="filterSessions('all',this)">All</div>
+      <div class="filter-btn" onclick="filterSessions('gym',this)">💪 Gym</div>
+      <div class="filter-btn" onclick="filterSessions('run',this)">🏃 Run</div>
+      <div class="filter-btn" onclick="filterSessions('pool',this)">🏊 Pool</div>
+      <div class="filter-btn" onclick="filterSessions('high',this)">⚡ 75–100</div>
+      <div class="filter-btn" onclick="filterSessions('mid',this)">🔶 60–74</div>
+      <div class="filter-btn" onclick="filterSessions('low',this)">🔴 &lt;60</div>
+    </div>
+    <div class="session-card" data-type="gym" data-zone="high">
+      <div class="session-header"><div><div class="session-title">💪 Push day</div><div class="session-meta">Chest · Shoulders · Triceps · 60–70 min</div></div><span class="badge b-green">75–100</span></div>
+      <div class="ex-row"><div><div class="ex-name">Bench press</div><div class="ex-detail">2 sec eccentric</div></div><div class="ex-sets">4 × 8–10</div></div>
+      <div class="ex-row"><div><div class="ex-name">Incline DB press</div><div class="ex-detail">Upper chest</div></div><div class="ex-sets">3 × 10–12</div></div>
+      <div class="ex-row"><div><div class="ex-name">Lateral raises</div><div class="ex-detail">Slow tempo</div></div><div class="ex-sets">4 × 15</div></div>
+      <div class="ex-row"><div><div class="ex-name">Seated overhead press</div><div class="ex-detail">DB or barbell</div></div><div class="ex-sets">3 × 10</div></div>
+      <div class="ex-row"><div><div class="ex-name">Cable tricep pushdown</div><div class="ex-detail">Full extension</div></div><div class="ex-sets">3 × 12–15</div></div>
+      <div class="ex-row"><div><div class="ex-name">Overhead tricep extension</div><div class="ex-detail">Long head focus</div></div><div class="ex-sets">3 × 12</div></div>
+    </div>
+    <div class="session-card" data-type="gym" data-zone="high">
+      <div class="session-header"><div><div class="session-title">💪 Pull day</div><div class="session-meta">Back · Biceps · Rear delts · 60–70 min</div></div><span class="badge b-green">75–100</span></div>
+      <div class="ex-row"><div><div class="ex-name">Deadlift</div><div class="ex-detail">Hip hinge, neutral spine</div></div><div class="ex-sets">4 × 6–8</div></div>
+      <div class="ex-row"><div><div class="ex-name">Pull-ups / lat pulldown</div><div class="ex-detail">Full ROM</div></div><div class="ex-sets">4 × 8–10</div></div>
+      <div class="ex-row"><div><div class="ex-name">Seated cable row</div><div class="ex-detail">Squeeze at peak</div></div><div class="ex-sets">3 × 10–12</div></div>
+      <div class="ex-row"><div><div class="ex-name">Single arm DB row</div><div class="ex-detail">Chest on bench</div></div><div class="ex-sets">3 × 10 each</div></div>
+      <div class="ex-row"><div><div class="ex-name">Face pulls</div><div class="ex-detail">Rear delt + rotator cuff</div></div><div class="ex-sets">3 × 15</div></div>
+      <div class="ex-row"><div><div class="ex-name">Barbell / DB curl</div><div class="ex-detail">No swinging</div></div><div class="ex-sets">3 × 12</div></div>
+    </div>
+    <div class="session-card" data-type="gym" data-zone="high">
+      <div class="session-header"><div><div class="session-title">💪 Legs day</div><div class="session-meta">Quads · Hamstrings · Glutes · 65–75 min</div></div><span class="badge b-green">75–100</span></div>
+      <div class="ex-row"><div><div class="ex-name">Back squat</div><div class="ex-detail">Below parallel</div></div><div class="ex-sets">4 × 8–10</div></div>
+      <div class="ex-row"><div><div class="ex-name">Romanian deadlift</div><div class="ex-detail">Hamstring stretch</div></div><div class="ex-sets">3 × 10</div></div>
+      <div class="ex-row"><div><div class="ex-name">Leg press</div><div class="ex-detail">High foot for glutes</div></div><div class="ex-sets">3 × 12</div></div>
+      <div class="ex-row"><div><div class="ex-name">Walking lunges</div><div class="ex-detail">DB in hands</div></div><div class="ex-sets">3 × 12 each</div></div>
+      <div class="ex-row"><div><div class="ex-name">Leg curl machine</div><div class="ex-detail">Hamstring isolation</div></div><div class="ex-sets">3 × 12</div></div>
+      <div class="ex-row"><div><div class="ex-name">Calf raises</div><div class="ex-detail">Slow, full range</div></div><div class="ex-sets">4 × 20</div></div>
+    </div>
+    <div class="session-card" data-type="gym" data-zone="mid">
+      <div class="session-header"><div><div class="session-title">💪 Gym — moderate</div><div class="session-meta">Any group · 45 min · 70% effort</div></div><span class="badge b-amber">60–74</span></div>
+      <div class="ex-row"><div><div class="ex-name">1 main compound lift</div><div class="ex-detail">Squat, bench, or deadlift at 70%</div></div><div class="ex-sets">3 × 8</div></div>
+      <div class="ex-row"><div><div class="ex-name">2 accessory exercises</div><div class="ex-detail">Pick any 2 from session</div></div><div class="ex-sets">2 × 12</div></div>
+      <div class="ex-row"><div><div class="ex-name">Core finisher</div><div class="ex-detail">Plank, dead bug, bird dog</div></div><div class="ex-sets">3 × 30 sec</div></div>
+    </div>
+    <div class="session-card" data-type="run" data-zone="high">
+      <div class="session-header"><div><div class="session-title">🏃 Long run — Zone 2</div><div class="session-meta">Outdoor · 45–60 min · Fat burning</div></div><span class="badge b-green">75–100</span></div>
+      <div class="ex-row"><div><div class="ex-name">Warm-up walk</div><div class="ex-detail">Brisk pace</div></div><div class="ex-sets">5 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Zone 2 run</div><div class="ex-detail">Conversational pace — speak in sentences</div></div><div class="ex-sets">40–50 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Cool-down walk + stretch</div><div class="ex-detail">Calf + hamstring</div></div><div class="ex-sets">5–10 min</div></div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge b-blue" id="runZ2Badge">HR: 114–133 bpm</span>
+        <span class="badge b-purple">Distance: 6–10km</span>
+      </div>
+    </div>
+    <div class="session-card" data-type="run" data-zone="mid">
+      <div class="session-header"><div><div class="session-title">🏃 Tempo run</div><div class="session-meta">Outdoor · 30 min · Comfortably hard</div></div><span class="badge b-amber">60–74</span></div>
+      <div class="ex-row"><div><div class="ex-name">Warm-up jog</div><div class="ex-detail">Very easy</div></div><div class="ex-sets">5 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Tempo run</div><div class="ex-detail">Zone 3 — 3 to 5km</div></div><div class="ex-sets">20 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Cool-down walk</div></div><div class="ex-sets">5 min</div></div>
+      <div style="margin-top:10px;"><span class="badge b-blue" id="runZ3Badge">HR: 133–152 bpm</span></div>
+    </div>
+    <div class="session-card" data-type="pool" data-zone="high">
+      <div class="session-header"><div><div class="session-title">🏊 Swim — endurance</div><div class="session-meta">Pool · 40–50 min · Steady</div></div><span class="badge b-green">75–100</span></div>
+      <div class="ex-row"><div><div class="ex-name">Freestyle warm-up</div><div class="ex-detail">Breathe every 3 strokes</div></div><div class="ex-sets">4 × 25m</div></div>
+      <div class="ex-row"><div><div class="ex-name">Freestyle main set</div><div class="ex-detail">Steady aerobic, 20 sec rest/lap</div></div><div class="ex-sets">20 × 25m</div></div>
+      <div class="ex-row"><div><div class="ex-name">Breaststroke cool-down</div></div><div class="ex-sets">4 × 25m</div></div>
+    </div>
+    <div class="session-card" data-type="pool" data-zone="mid">
+      <div class="session-header"><div><div class="session-title">🏊 Swim — recovery</div><div class="session-meta">Pool · 25–30 min · Easy</div></div><span class="badge b-amber">60–74</span></div>
+      <div class="ex-row"><div><div class="ex-name">Easy freestyle or breaststroke</div><div class="ex-detail">Focus on breathing and form</div></div><div class="ex-sets">16 × 25m</div></div>
+      <div class="tip tip-green" style="margin-top:10px;margin-bottom:0;">Water flushes lactic acid — ideal after a tough shift.</div>
+    </div>
+    <div class="session-card" data-type="gym run pool" data-zone="low">
+      <div class="session-header"><div><div class="session-title">🧘 Active recovery</div><div class="session-meta">Home · 20–30 min · No gym</div></div><span class="badge b-red">&lt;60</span></div>
+      <div class="ex-row"><div><div class="ex-name">Easy walk</div><div class="ex-detail">No pace target</div></div><div class="ex-sets">10 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Full body stretch</div><div class="ex-detail">Hip flexors, hamstrings, chest</div></div><div class="ex-sets">15 min</div></div>
+      <div class="ex-row"><div><div class="ex-name">Foam rolling</div><div class="ex-detail">Quads, IT band, upper back</div></div><div class="ex-sets">10 min</div></div>
+      <div class="tip tip-red" style="margin-top:10px;margin-bottom:0;">Below 60 = repair mode. Sleep + eat protein — that IS today's session.</div>
+    </div>
+  </div>
+
+  <!-- ─── MY STATS ─── -->
+  <div class="screen" id="screen-stats">
+    <div class="stats-hero">
+      <div class="stats-hero-title">📊 My training variables</div>
+      <div class="stats-hero-sub">Update whenever your stats change. All calculations — calories, protein, HR zones, BMI — update live across the whole app instantly.</div>
+    </div>
+
+    <div class="sec-label">Body measurements</div>
+    <div class="card">
+      <div class="input-group">
+        <div class="input-label">Age (years) <span class="lval" id="lbl-age">30</span></div>
+        <input type="range" min="18" max="60" value="30" step="1" id="inp-age" oninput="onSlider()">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Height (cm) <span class="lval" id="lbl-height">176</span></div>
+        <input type="range" min="150" max="210" value="176" step="1" id="inp-height" oninput="onSlider()">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Weight (kg) <span class="lval" id="lbl-weight">78</span></div>
+        <input type="range" min="40" max="150" value="78" step="0.5" id="inp-weight" oninput="onSlider()">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Body fat % <span style="font-size:11px;color:var(--text2);font-family:var(--fm);">from Samsung Health BIA</span> <span class="lval" id="lbl-bf">25.7</span></div>
+        <input type="range" min="5" max="45" value="25.7" step="0.5" id="inp-bf" oninput="onSlider()">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Skeletal muscle (kg) <span style="font-size:11px;color:var(--text2);font-family:var(--fm);">from Samsung Health</span> <span class="lval" id="lbl-muscle">31</span></div>
+        <input type="range" min="10" max="70" value="31" step="0.5" id="inp-muscle" oninput="onSlider()">
+      </div>
+    </div>
+
+    <div class="sec-label">Training profile</div>
+    <div class="card">
+      <div class="input-group">
+        <div class="input-label" style="margin-bottom:10px;">Activity level</div>
+        <div class="seg-control">
+          <div class="seg-btn" onclick="setSeg('activity','sedentary',this)">Sedentary</div>
+          <div class="seg-btn" onclick="setSeg('activity','light',this)">Light</div>
+          <div class="seg-btn active" onclick="setSeg('activity','moderate',this)">Moderate</div>
+          <div class="seg-btn" onclick="setSeg('activity','active',this)">Active</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label" style="margin-bottom:10px;">Goal</div>
+        <div class="seg-control">
+          <div class="seg-btn" onclick="setSeg('goal','bulk',this)">Bulk +300</div>
+          <div class="seg-btn active" onclick="setSeg('goal','cut',this)">Cut –300</div>
+          <div class="seg-btn" onclick="setSeg('goal','maintain',this)">Maintain</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label" style="margin-bottom:10px;">Weekly training days</div>
+        <div class="seg-control">
+          <div class="seg-btn" onclick="setSeg('days','3',this)">3</div>
+          <div class="seg-btn active" onclick="setSeg('days','4',this)">4</div>
+          <div class="seg-btn" onclick="setSeg('days','5',this)">5</div>
+          <div class="seg-btn" onclick="setSeg('days','6',this)">6</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label" style="margin-bottom:10px;">Sleep quality (recent)</div>
+        <div class="seg-control">
+          <div class="seg-btn" onclick="setSeg('sleep','poor',this)">Poor &lt;6h</div>
+          <div class="seg-btn active" onclick="setSeg('sleep','low',this)">Low ~6h</div>
+          <div class="seg-btn" onclick="setSeg('sleep','good',this)">Good 7–8h</div>
+          <div class="seg-btn" onclick="setSeg('sleep','great',this)">Great 8h+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">Live calculated results</div>
+    <div class="calc-grid" id="calcGrid"></div>
+
+    <div class="sec-label">Daily macro targets</div>
+    <div class="card">
+      <div class="macro-bar-wrap">
+        <div class="macro-header"><span style="color:var(--purple)">Protein</span><span id="out-p-g" style="color:var(--text2);font-family:var(--fm);font-size:12px;font-weight:400;">—</span></div>
+        <div class="macro-track"><div class="macro-fill" id="bar-p" style="width:30%;background:var(--purple)"></div></div>
+      </div>
+      <div class="macro-bar-wrap">
+        <div class="macro-header"><span style="color:var(--amber)">Carbs</span><span id="out-c-g" style="color:var(--text2);font-family:var(--fm);font-size:12px;font-weight:400;">—</span></div>
+        <div class="macro-track"><div class="macro-fill" id="bar-c" style="width:39%;background:var(--amber)"></div></div>
+      </div>
+      <div class="macro-bar-wrap">
+        <div class="macro-header"><span style="color:var(--blue)">Fats</span><span id="out-f-g" style="color:var(--text2);font-family:var(--fm);font-size:12px;font-weight:400;">—</span></div>
+        <div class="macro-track"><div class="macro-fill" id="bar-f" style="width:28%;background:var(--blue)"></div></div>
+      </div>
+    </div>
+
+    <div class="sec-label">HR zones (from age)</div>
+    <div class="card" id="hrMini"></div>
+
+    <div class="sec-label">Training recommendations</div>
+    <div class="card" id="trainRec"></div>
+
+    <button class="save-btn" onclick="saveStats()">✓ Save & apply to app</button>
+    <div class="saved-toast" id="savedToast">Stats saved — everything updated!</div>
+  </div>
+
+  <!-- ─── HISTORY (enhanced) ─── -->
+  <div class="screen" id="screen-history">
+
+    <!-- SECTION 1: Weekly Insights -->
+    <div class="sec-label">WEEKLY INSIGHTS</div>
+    <div class="insight-grid" id="insightGrid">
+      <!-- rendered by JS -->
+    </div>
+    <div id="recoveryWarnings"></div>
+
+    <!-- SECTION 2: Workout Log -->
+    <div class="sec-label">WORKOUT LOG — THIS WEEK</div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--text2);font-family:var(--fm);margin-bottom:12px;line-height:1.5;">
+        Tap ✅ or ❌ for each day. Builds your adherence score and recovery patterns.
+      </div>
+      <div class="wlog-week" id="wlogWeek"><!-- rendered by JS --></div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);">
+        <div style="font-size:12px;color:var(--text2);font-family:var(--fm);">Adherence this week</div>
+        <div style="font-size:14px;font-weight:800;" id="adherencePct">—</div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Progress chart (kept, but secondary) -->
+    <div class="sec-label" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>WEIGHT & ENERGY CHART</span>
+      <button onclick="clearHistory()" style="background:var(--red-dim); color:var(--red); border:none; padding:4px 8px; border-radius:4px; font-family:var(--fm); font-size:10px;">CLEAR</button>
+    </div>
+    <div class="card">
+      <canvas id="historyChart" width="100" height="70"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="sec-label" style="margin-top:0;">DATA LOG</div>
+      <div id="historyLogList" style="font-family:var(--fm); font-size:12px; max-height:200px; overflow-y:auto; color:var(--text2);">
+         No history yet. Change your weight or energy score to save an entry.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="showScreen('decider')" id="nav-decider"><div class="nav-icon">⚡</div><div class="nav-label">Decider</div></div>
+  <div class="nav-item" onclick="showScreen('sessions')" id="nav-sessions"><div class="nav-icon">💪</div><div class="nav-label">Sessions</div></div>
+  <div class="nav-item" onclick="showScreen('stats')" id="nav-stats"><div class="nav-icon">📊</div><div class="nav-label">My Stats</div></div>
+  <div class="nav-item" onclick="showScreen('history')" id="nav-history"><div class="nav-icon">📈</div><div class="nav-label">History</div></div>
+</div>
+
+<script>
+var S={age:30,height:176,weight:78,bf:25.7,muscle:31,activity:'moderate',goal:'cut',days:'4',sleep:'low',energy:77};
+var actMult={sedentary:1.2,light:1.375,moderate:1.55,active:1.725};
+var goalAdj={bulk:300,cut:-300,maintain:0};
+
+// Restore energy slider immediately from localStorage (before Drive connects)
+(function(){
+  try {
+    var savedEnergy = localStorage.getItem('fitshift_energy');
+    if (savedEnergy) {
+      var v = parseInt(savedEnergy);
+      if (!isNaN(v)) {
+        var slider = document.getElementById('energySlider');
+        if (slider) slider.value = v;
+        S.energy = v;
+        updateEnergy(v);
+      }
+    }
+  } catch(e) {}
+})();
+
+// Splash
+setTimeout(function(){document.getElementById('splash').classList.add('gone');setTimeout(calcAll,300);setTimeout(animProgs,600);},1600);
+
+// Date
+var D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var n=new Date();
+document.getElementById('headerDate').textContent=D[n.getDay()]+', '+n.getDate()+' '+M[n.getMonth()]+' '+n.getFullYear();
+
+function showScreen(nm){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
+  document.getElementById('screen-'+nm).classList.add('active');
+  document.getElementById('nav-'+nm).classList.add('active');
+  window.scrollTo(0,0);
+  if(nm==='history') setTimeout(renderChart, 100);
+}
+
+function setSeg(key,val,el){
+  S[key]=val;
+  el.closest('.seg-control').querySelectorAll('.seg-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  calcAll();
+}
+
+
+function onSlider(){
+  S.age=+document.getElementById('inp-age').value;
+  S.height=+document.getElementById('inp-height').value;
+  S.weight=parseFloat(document.getElementById('inp-weight').value);
+  S.bf=parseFloat(document.getElementById('inp-bf').value);
+  S.muscle=parseFloat(document.getElementById('inp-muscle').value);
+
+  // Validation clamps
+  S.age=Math.min(Math.max(S.age,18),80);
+  S.height=Math.min(Math.max(S.height,120),230);
+  S.weight=Math.min(Math.max(S.weight,30),300);
+  S.bf=Math.min(Math.max(S.bf,3),60);
+  S.muscle=Math.min(Math.max(S.muscle,10),100);
+
+  g('lbl-age').textContent=S.age;
+  g('lbl-height').textContent=S.height;
+  g('lbl-weight').textContent=S.weight.toFixed(1);
+  g('lbl-bf').textContent=S.bf.toFixed(1);
+  g('lbl-muscle').textContent=S.muscle.toFixed(1);
+
+  calcAll();
+  debounceSave();
+}
+
+
+function debounceSave(){
+  clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(function(){
+    saveFitShiftData();
+  },400);
+}
+
+function calcAll(){
+  var age=S.age,h=S.height,w=S.weight,bf=S.bf,mu=S.muscle;
+  var bmi=w/((h/100)*(h/100));
+  var fatKg=w*bf/100;
+  var lbm=w-fatKg;
+  var bmr=10*w+6.25*h-5*age+5;
+  var tdee=bmr*actMult[S.activity];
+  var target=tdee+goalAdj[S.goal];
+  var protein=Math.round(lbm*2.2);
+  var protKcal=protein*4;
+  var rem=target-protKcal;
+  var carbKcal=rem*0.55,fatKcal=rem*0.45;
+  var carbs=Math.round(carbKcal/4),fats=Math.round(fatKcal/9);
+  var maxHR=220-age;
+  var z1=[Math.round(maxHR*.5),Math.round(maxHR*.6)];
+  var z2=[Math.round(maxHR*.6),Math.round(maxHR*.7)];
+  var z3=[Math.round(maxHR*.7),Math.round(maxHR*.8)];
+  var z4=[Math.round(maxHR*.8),Math.round(maxHR*.9)];
+  var z5=[Math.round(maxHR*.9),maxHR];
+
+  var bmiCat,bmiCol;
+  if(bmi<18.5){bmiCat='underweight';bmiCol='var(--blue)';}
+  else if(bmi<25){bmiCat='healthy ✓';bmiCol='var(--green)';}
+  else if(bmi<30){bmiCat='borderline';bmiCol='var(--amber)';}
+  else{bmiCat='obese';bmiCol='var(--red)';}
+
+  var bfCat,bfCol;
+  if(bf<10){bfCat='essential';bfCol='var(--blue)';}
+  else if(bf<=17){bfCat='lean ✓';bfCol='var(--green)';}
+  else if(bf<=22){bfCat='fit';bfCol='var(--green)';}
+  else if(bf<=28){bfCat='average';bfCol='var(--amber)';}
+  else{bfCat='above avg';bfCol='var(--red)';}
+
+  // Sleep impact on recovery
+  var sleepNote={poor:'⚠️ Very poor recovery — reduce training load significantly',low:'Low recovery — avoid high intensity sessions',good:'Good recovery — train as planned',great:'Excellent recovery — go for PRs'};
+  var sleepCol={poor:'var(--red)',low:'var(--amber)',good:'var(--green)',great:'var(--green)'};
+
+  // Fat to lose to reach lean (17% bf for men)
+  var targetBF=17,targetFatKg=w*targetBF/100,fatToLose=Math.max(0,fatKg-targetFatKg);
+  var weeksToGoal=Math.ceil(fatToLose/0.5);
+
+  // Calc tiles
+  var tiles=[
+    {id:'ct-bmi',val:bmi.toFixed(1),label:'BMI',badge:bmiCat,bCol:bmiCol,vCol:bmiCol},
+    {id:'ct-bmr',val:Math.round(bmr).toLocaleString(),label:'BMR kcal',badge:'at rest',bCol:'var(--text3)',vCol:'var(--blue)'},
+    {id:'ct-tdee',val:Math.round(tdee).toLocaleString(),label:'TDEE kcal',badge:'total daily burn',bCol:'var(--text3)',vCol:'var(--purple)'},
+    {id:'ct-target',val:Math.round(target).toLocaleString(),label:'Target kcal',badge:S.goal==='cut'?'–300 deficit':S.goal==='bulk'?'+300 surplus':'maintain',bCol:S.goal==='cut'?'var(--green)':S.goal==='bulk'?'var(--amber)':'var(--blue)',vCol:'var(--green)'},
+    {id:'ct-protein',val:protein+'g',label:'Protein/day',badge:'2.2g × '+lbm.toFixed(0)+'kg LBM',bCol:'var(--text3)',vCol:'var(--purple)'},
+    {id:'ct-maxhr',val:maxHR,label:'Max HR bpm',badge:'220 − age',bCol:'var(--text3)',vCol:'var(--red)'},
+    {id:'ct-fatkg',val:fatKg.toFixed(1)+'kg',label:'Fat mass',badge:bfCat,bCol:bfCol,vCol:bfCol},
+    {id:'ct-lbm',val:lbm.toFixed(1)+'kg',label:'Lean mass',badge:'muscle + bone',bCol:'var(--text3)',vCol:'var(--green)'},
+    {id:'ct-fatloss',val:fatToLose.toFixed(1)+'kg',label:'Fat to lose',badge:'to reach lean',bCol:'var(--text3)',vCol:'var(--amber)'},
+    {id:'ct-weeks',val:weeksToGoal+'wk',label:'Est. timeline',badge:'at 0.5kg/week',bCol:'var(--text3)',vCol:'var(--blue)'},
+  ];
+  var gridHtml='';
+  tiles.forEach(function(t){
+    gridHtml+='<div class="calc-tile"><div class="calc-val" style="color:'+t.vCol+'">'+t.val+'</div><div class="calc-label">'+t.label+'</div><div class="calc-badge" style="color:'+t.bCol+';font-size:10px;font-family:var(--fm)">'+t.badge+'</div></div>';
+  });
+  g('calcGrid').innerHTML=gridHtml;
+
+  // Macros
+  var pPct=Math.round(protKcal/target*100);
+  var cPct=Math.round(carbKcal/target*100);
+  var fPct=Math.round(fatKcal/target*100);
+  g('out-p-g').textContent=protein+'g · '+Math.round(protKcal)+' kcal ('+pPct+'%)';
+  g('out-c-g').textContent=carbs+'g · '+Math.round(carbKcal)+' kcal ('+cPct+'%)';
+  g('out-f-g').textContent=fats+'g · '+Math.round(fatKcal)+' kcal ('+fPct+'%)';
+  document.getElementById('bar-p').style.width=pPct+'%';
+  document.getElementById('bar-c').style.width=cPct+'%';
+  document.getElementById('bar-f').style.width=fPct+'%';
+
+  // HR zones html
+  var zones=[
+    {name:'Zone 1 — recovery',range:z1[0]+'–'+z1[1],pct:20,col:'var(--blue)',desc:'Warm-up, cool-down, active rest days'},
+    {name:'Zone 2 — fat burn ⭐',range:z2[0]+'–'+z2[1],pct:40,col:'var(--green)',desc:'Long easy runs, steady swims. Primary fat-burning zone.'},
+    {name:'Zone 3 — aerobic',range:z3[0]+'–'+z3[1],pct:60,col:'var(--amber)',desc:'Tempo runs, gym cardio. Comfortably hard.'},
+    {name:'Zone 4 — threshold',range:z4[0]+'–'+z4[1],pct:80,col:'var(--red)',desc:'HIIT intervals. Energy score 80+ only.'},
+    {name:'Zone 5 — max effort',range:z5[0]+'–'+z5[1],pct:100,col:'#ff2020',desc:'Sprints 20–40 sec. Energy score 85+ only.'},
+  ];
+  var zHtml='';
+  zones.forEach(function(z){
+    zHtml+='<div class="zone-row"><div class="zone-header"><div class="zone-name" style="color:'+z.col+'">'+z.name+'</div><div class="zone-bpm">'+z.range+' bpm</div></div>';
+    zHtml+='<div class="zone-prog"><div class="zone-fill" style="width:'+z.pct+'%;background:'+z.col+'"></div></div>';
+    zHtml+='<div class="zone-desc">'+z.desc+'</div></div>';
+  });
+  g('hrMini').innerHTML=zHtml;
+  if(g('hrFull')) g('hrFull').innerHTML=zHtml;
+
+  // Watch alert thresholds
+  if(g('watchHigh')) g('watchHigh').textContent=z3[1];
+  if(g('watchLow')) g('watchLow').textContent=z1[0];
+
+  // Training recs
+  var recHtml='';
+  recHtml+='<div class="status-row"><div class="status-key">BMI status</div><div class="status-val" style="color:'+bmiCol+'">'+bmiCat+'</div></div>';
+  recHtml+='<div class="status-row"><div class="status-key">Body fat status</div><div class="status-val" style="color:'+bfCol+'">'+bfCat+' ('+bf.toFixed(1)+'%)</div></div>';
+  recHtml+='<div class="status-row"><div class="status-key">Sleep impact</div><div class="status-val" style="color:'+sleepCol[S.sleep]+';font-size:12px;font-family:var(--fm)">'+sleepNote[S.sleep]+'</div></div>';
+  recHtml+='<div class="status-row"><div class="status-key">Protein target</div><div class="status-val" style="color:var(--purple)">'+protein+'g/day</div></div>';
+  recHtml+='<div class="status-row"><div class="status-key">Zone 2 run range</div><div class="status-val" style="color:var(--green)">'+z2[0]+'–'+z2[1]+' bpm</div></div>';
+  recHtml+='<div class="status-row"><div class="status-key">Training days/week</div><div class="status-val">'+S.days+' sessions</div></div>';
+  recHtml+='<div class="status-row" style="border:none;"><div class="status-key">Est. lean goal timeline</div><div class="status-val" style="color:var(--blue)">~'+weeksToGoal+' weeks at 0.5kg fat/week</div></div>';
+  g('trainRec').innerHTML=recHtml;
+
+  // Sessions badges
+  g('runZ2Badge').textContent='HR: '+z2[0]+'–'+z2[1]+' bpm';
+  g('runZ3Badge').textContent='HR: '+z3[0]+'–'+z3[1]+' bpm';
+}
+
+
+function saveStats(){
+  saveFitShiftData();
+
+  var btn=document.querySelector('.save-btn');
+  var toast=g('savedToast');
+
+  btn.textContent='✓ Saved!';
+  toast.style.display='block';
+
+  setTimeout(function(){
+    btn.textContent='✓ Save & apply to app';
+    toast.style.display='none';
+  },2200);
+}
+
+
+function updateEnergy(v){
+  S.energy = v;
+  try { localStorage.setItem('fitshift_energy', v); } catch(e) {}
+  g('headerEnergy').textContent=v;
+  g('zoneThumb').style.left=v+'%';
+  var col,lbl,sess,inten,dur,best,adv,tcls;
+  if(v>=85){col='var(--green)';lbl='Excellent — go all out';sess='Long run 8–10km or heavy gym';inten='100% — new PRs';dur='65–75 min';best='Legs day or run 10km';adv='Peak energy. Hit your heaviest lifts or longest run. Great day to set a new personal record.';tcls='tip-green';}
+  else if(v>=75){col='var(--green)';lbl='Good — train hard';sess='Gym strength or run 6–8km';inten='Full — 100%';dur='60–70 min';best='Push/Pull/Legs or long run';adv='Full capacity — pick your scheduled session and go all in. Great day for compound lifts and running.';tcls='tip-green';}
+  else if(v>=65){col='var(--amber)';lbl='Moderate — train smart';sess='Moderate gym or tempo 3–5km';inten='70–80%';dur='45–55 min';best='1 compound lift + swim';adv='Good to train but reduce volume 20%. Drop 1–2 sets, lighten weight. Tempo run or recovery swim is ideal.';tcls='tip-amber';}
+  else if(v>=60){col='var(--amber)';lbl='Low-moderate — keep it short';sess='Light gym or easy 3km jog';inten='60–70%';dur='30–40 min';best='Easy swim or short jog';adv='Train lightly — 2–3 exercises or easy 20 min jog. Do not push. Body is signalling fatigue.';tcls='tip-amber';}
+  else{col='var(--red)';lbl='Low — rest today';sess='Rest, stretch, walk only';inten='No intensity';dur='20 min walk max';best='Sleep and eat well';adv='Below 60 = repair mode. Skipping today protects your next 5 sessions. Sleep, hydrate, hit your protein target.';tcls='tip-red';}
+  g('scoreNum').style.color=col;g('scoreNum').textContent=v;
+  g('scoreLabel').style.color=col;g('scoreLabel').textContent=lbl;
+  g('rSession').textContent=sess;g('rIntensity').textContent=inten;
+  g('rDuration').textContent=dur;g('rBest').textContent=best;
+  var box=g('adviceBox');box.textContent=adv;box.className='advice-box '+tcls;
+}
+
+function filterSessions(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.session-card').forEach(function(c){
+    var t=c.dataset.type||'',z=c.dataset.zone||'';
+    if(f==='all')c.style.display='block';
+    else if(f==='gym')c.style.display=t.includes('gym')?'block':'none';
+    else if(f==='run')c.style.display=t.includes('run')?'block':'none';
+    else if(f==='pool')c.style.display=t.includes('pool')?'block':'none';
+    else if(f==='high')c.style.display=z==='high'?'block':'none';
+    else if(f==='mid')c.style.display=z==='mid'?'block':'none';
+    else if(f==='low')c.style.display=z==='low'?'block':'none';
+  });
+}
+
+function animProgs(){}
+
+function g(id){return document.getElementById(id);}
+
+
+// --- HISTORY TRACKING & CHART ---
+let fitshiftHistory = [];
+let progressChart = null;
+let saveTimeout = null;
+
+function updateHistoryData() {
+  const currentWeight = document.getElementById('inp-weight') ? parseFloat(document.getElementById('inp-weight').value) : null;
+  const currentEnergy = document.getElementById('energySlider') ? parseInt(document.getElementById('energySlider').value) : null;
+  
+  if(!currentWeight || !currentEnergy) return;
+
+  const todayStr = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY
+  
+  let todayEntry = fitshiftHistory.find(entry => entry.date === todayStr);
+  
+  if (todayEntry) {
+    todayEntry.weight = currentWeight;
+    todayEntry.energy = currentEnergy;
+    todayEntry.sleep  = S.sleep || null;
+  } else {
+    fitshiftHistory.push({
+      date: todayStr,
+      weight: currentWeight,
+      energy: currentEnergy,
+      sleep:  S.sleep || null
+    });
+  }
+  
+  if(fitshiftHistory.length > 30) fitshiftHistory.shift();
+  
+  localStorage.setItem('fitshift_history_v3', JSON.stringify(fitshiftHistory));
+  
+  if(document.getElementById('screen-history').classList.contains('active')){
+      renderChart();
+  }
+}
+
+
+function loadHistoryData() {
+  try {
+    const stored = localStorage.getItem('fitshift_history_v3');
+    if (stored) {
+      fitshiftHistory = JSON.parse(stored) || [];
+    }
+  } catch(e) {
+    fitshiftHistory = [];
+    console.error('History load failed', e);
+  }
+}
+
+
+function clearHistory() {
+  if(confirm('Are you sure you want to clear your historical data?')) {
+    fitshiftHistory = [];
+    localStorage.removeItem('fitshift_history_v3');
+    renderChart();
+  }
+}
+
+function renderChart() {
+  if(!document.getElementById('historyChart')) return;
+  
+  const ctx = document.getElementById('historyChart').getContext('2d');
+  const labels = fitshiftHistory.map(entry => entry.date.substring(0, 5));
+  const weights = fitshiftHistory.map(entry => entry.weight);
+  const energies = fitshiftHistory.map(entry => entry.energy);
+  
+  if(progressChart) {
+    progressChart.destroy();
+  }
+  
+  Chart.defaults.color = '#888';
+  Chart.defaults.font.family = "'Roboto Mono', monospace";
+  
+  progressChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Weight (kg)',
+          data: weights,
+          borderColor: '#4fa3ff',
+          backgroundColor: 'rgba(79,163,255,0.1)',
+          yAxisID: 'yWeight',
+          tension: 0.3,
+          fill: true
+        },
+        {
+          label: 'Energy (0-100)',
+          data: energies,
+          borderColor: '#00d68f',
+          backgroundColor: 'transparent',
+          yAxisID: 'yEnergy',
+          tension: 0.3,
+          borderDash: [5, 5]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+        yWeight: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: { display: true, text: 'Weight', color: '#4fa3ff' },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        yEnergy: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: { display: true, text: 'Energy', color: '#00d68f' },
+          min: 0,
+          max: 100,
+          grid: { drawOnChartArea: false }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: '#f0f0f0' } }
+      }
+    }
+  });
+  
+  const logDiv = document.getElementById('historyLogList');
+  if(fitshiftHistory.length === 0) {
+    logDiv.innerHTML = 'No history yet. Change your weight or energy score to save an entry.';
+  } else {
+    let htmlStr = '';
+    [...fitshiftHistory].reverse().forEach(entry => {
+       htmlStr += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--border);">
+         <span>🗓️ ${entry.date}</span>
+         <span><span style="color:var(--blue)">${entry.weight}kg</span> | <span style="color:var(--green)">⚡${entry.energy}</span></span>
+       </div>`;
+    });
+    logDiv.innerHTML = htmlStr;
+  }
+}
+
+
+function saveFitShiftData() {
+  try {
+    localStorage.setItem('fitshift_data_v4', JSON.stringify(S));
+    updateHistoryData();
+  } catch(e) {
+    console.error('Save failed', e);
+  }
+}
+
+function loadFitShiftData() {
+  try {
+    const stored = localStorage.getItem('fitshift_data_v4');
+
+    if(stored){
+      const parsed = JSON.parse(stored);
+
+      S = Object.assign(S, parsed);
+
+      if(g('inp-age')) g('inp-age').value = S.age;
+      if(g('inp-height')) g('inp-height').value = S.height;
+      if(g('inp-weight')) g('inp-weight').value = S.weight;
+      if(g('inp-bf')) g('inp-bf').value = S.bf;
+      if(g('inp-muscle')) g('inp-muscle').value = S.muscle;
+
+      // Restore energy slider
+      if(S.energy && g('energySlider')) {
+        g('energySlider').value = S.energy;
+        updateEnergy(S.energy);
+      }
+
+      onSlider();
+    }
+  } catch(e) {
+    console.error('State load failed', e);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  WORKOUT LOG
+// ─────────────────────────────────────────────
+var workoutLog = {}; // { 'YYYY-MM-DD': 'done'|'skip'|null }
+
+function getWeekDates() {
+  var today = new Date();
+  var dow = today.getDay(); // 0=Sun
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - ((dow === 0 ? 7 : dow) - 1));
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function loadWorkoutLog() {
+  try {
+    var stored = localStorage.getItem('fitshift_wlog_v1');
+    if (stored) workoutLog = JSON.parse(stored) || {};
+  } catch(e) { workoutLog = {}; }
+}
+
+function saveWorkoutLog() {
+  localStorage.setItem('fitshift_wlog_v1', JSON.stringify(workoutLog));
+}
+
+function setWorkout(key, status) {
+  workoutLog[key] = workoutLog[key] === status ? null : status;
+  saveWorkoutLog();
+  renderWorkoutLog();
+  renderInsights();
+  renderRecoveryWarnings();
+}
+
+function renderWorkoutLog() {
+  var days = getWeekDates();
+  var labels = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  var todayKey = dateKey(new Date());
+  var html = '';
+  var done = 0, skip = 0, total = 0;
+
+  days.forEach(function(d, i) {
+    var key = dateKey(d);
+    var status = workoutLog[key] || null;
+    var isPast = key <= todayKey;
+    if (isPast) total++;
+    if (status === 'done') done++;
+    if (status === 'skip') skip++;
+
+    var doneActive = status === 'done' ? 'done' : (isPast ? 'none' : '');
+    var skipActive = status === 'skip' ? 'skip' : (isPast ? 'none' : '');
+
+    html += '<div class="wlog-day">';
+    html += '<div class="wlog-day-label">' + labels[i] + '</div>';
+    html += '<div class="wlog-btn-wrap">';
+    html += '<div class="wlog-btn ' + doneActive + '" onclick="setWorkout(\'' + key + '\',\'done\')">✅</div>';
+    html += '<div class="wlog-btn ' + skipActive + '" onclick="setWorkout(\'' + key + '\',\'skip\')">❌</div>';
+    html += '</div></div>';
+  });
+
+  var el = document.getElementById('wlogWeek');
+  if (el) el.innerHTML = html;
+
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  var pctEl = document.getElementById('adherencePct');
+  if (pctEl) {
+    pctEl.textContent = pct + '%';
+    pctEl.style.color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+  }
+}
+
+// ─────────────────────────────────────────────
+//  WEEKLY INSIGHTS
+// ─────────────────────────────────────────────
+function getWeekInsights() {
+  var days = getWeekDates();
+  var todayKey = dateKey(new Date());
+  var weekKeys = days.map(dateKey);
+
+  // Energy from history entries this week
+  var weekEntries = fitshiftHistory.filter(function(e) {
+    // history date is DD/MM/YYYY
+    var parts = e.date.split('/');
+    if (parts.length < 3) return false;
+    var k = parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
+    return weekKeys.indexOf(k) !== -1;
+  });
+
+  var avgEnergy = weekEntries.length > 0
+    ? Math.round(weekEntries.reduce(function(a,b){return a+b.energy;},0) / weekEntries.length)
+    : null;
+
+  // Workout adherence
+  var done = 0, skip = 0, logged = 0;
+  weekKeys.forEach(function(k) {
+    if (k <= todayKey) {
+      logged++;
+      if (workoutLog[k] === 'done') done++;
+      if (workoutLog[k] === 'skip') skip++;
+    }
+  });
+  var adherencePct = logged > 0 ? Math.round(done / logged * 100) : null;
+
+  // Sleep from S.sleep setting (used as proxy for recent sleep quality)
+  var sleepMap = {poor:'Low', low:'Moderate', good:'Good', great:'Excellent'};
+  var sleepQuality = sleepMap[S.sleep] || '—';
+
+  // Recovery trend: look at last 5 energy entries
+  var last5 = fitshiftHistory.slice(-5).map(function(e){return e.energy;});
+  var trend = null;
+  if (last5.length >= 3) {
+    var first = last5.slice(0, Math.floor(last5.length/2));
+    var second = last5.slice(Math.floor(last5.length/2));
+    var avgFirst = first.reduce(function(a,b){return a+b;},0)/first.length;
+    var avgSecond = second.reduce(function(a,b){return a+b;},0)/second.length;
+    if (avgSecond - avgFirst >= 5) trend = 'improving';
+    else if (avgFirst - avgSecond >= 5) trend = 'declining';
+    else trend = 'stable';
+  }
+
+  return {avgEnergy: avgEnergy, adherencePct: adherencePct, sleepQuality: sleepQuality, trend: trend, done: done, skip: skip, logged: logged};
+}
+
+function renderInsights() {
+  var ins = getWeekInsights();
+  var el = document.getElementById('insightGrid');
+  if (!el) return;
+
+  var energyCol = ins.avgEnergy === null ? 'var(--text2)' : ins.avgEnergy >= 75 ? 'var(--green)' : ins.avgEnergy >= 60 ? 'var(--amber)' : 'var(--red)';
+  var energyClass = ins.avgEnergy === null ? 'it-blue' : ins.avgEnergy >= 75 ? 'it-green' : ins.avgEnergy >= 60 ? 'it-amber' : 'it-red';
+  var energyVal = ins.avgEnergy !== null ? ins.avgEnergy : '—';
+
+  var adhCol = ins.adherencePct === null ? 'var(--text2)' : ins.adherencePct >= 80 ? 'var(--green)' : ins.adherencePct >= 60 ? 'var(--amber)' : 'var(--red)';
+  var adhClass = ins.adherencePct === null ? 'it-blue' : ins.adherencePct >= 80 ? 'it-green' : ins.adherencePct >= 60 ? 'it-amber' : 'it-red';
+  var adhVal = ins.adherencePct !== null ? ins.adherencePct + '%' : '—';
+
+  var sleepCol = ins.sleepQuality === 'Excellent' ? 'var(--green)' : ins.sleepQuality === 'Good' ? 'var(--green)' : ins.sleepQuality === 'Moderate' ? 'var(--amber)' : 'var(--red)';
+  var sleepClass = ins.sleepQuality === 'Excellent' || ins.sleepQuality === 'Good' ? 'it-green' : ins.sleepQuality === 'Moderate' ? 'it-amber' : 'it-red';
+
+  var trendIcon = ins.trend === 'improving' ? '📈' : ins.trend === 'declining' ? '📉' : ins.trend === 'stable' ? '➡️' : '—';
+  var trendCol = ins.trend === 'improving' ? 'var(--green)' : ins.trend === 'declining' ? 'var(--red)' : 'var(--amber)';
+  var trendClass = ins.trend === 'improving' ? 'it-green' : ins.trend === 'declining' ? 'it-red' : 'it-amber';
+
+  el.innerHTML =
+    '<div class="insight-tile ' + energyClass + '">' +
+      '<span class="insight-icon">⚡</span>' +
+      '<div class="insight-val" style="color:' + energyCol + '">' + energyVal + '</div>' +
+      '<div class="insight-label">Avg energy this week</div>' +
+      '<div class="insight-sub" style="color:' + energyCol + '">' + (ins.avgEnergy === null ? 'No data yet' : ins.avgEnergy >= 75 ? 'Looking strong' : ins.avgEnergy >= 60 ? 'Train smart' : 'Rest priority') + '</div>' +
+    '</div>' +
+    '<div class="insight-tile ' + adhClass + '">' +
+      '<span class="insight-icon">🏋</span>' +
+      '<div class="insight-val" style="color:' + adhCol + '">' + adhVal + '</div>' +
+      '<div class="insight-label">Training adherence</div>' +
+      '<div class="insight-sub" style="color:' + adhCol + '">' + (ins.done) + ' done · ' + (ins.skip) + ' skipped</div>' +
+    '</div>' +
+    '<div class="insight-tile ' + sleepClass + '">' +
+      '<span class="insight-icon">😴</span>' +
+      '<div class="insight-val" style="color:' + sleepCol + '">' + ins.sleepQuality + '</div>' +
+      '<div class="insight-label">Sleep quality</div>' +
+      '<div class="insight-sub" style="color:' + sleepCol + '">' + (ins.sleepQuality === 'Low' || ins.sleepQuality === 'Moderate' ? 'Impacts recovery' : 'Aids recovery') + '</div>' +
+    '</div>' +
+    '<div class="insight-tile ' + trendClass + '">' +
+      '<span class="insight-icon">' + trendIcon + '</span>' +
+      '<div class="insight-val" style="font-size:14px;color:' + trendCol + '">' + (ins.trend ? ins.trend.charAt(0).toUpperCase() + ins.trend.slice(1) : '—') + '</div>' +
+      '<div class="insight-label">Recovery trend</div>' +
+      '<div class="insight-sub" style="color:' + trendCol + '">' + (ins.trend === null ? 'Need more data' : 'Last 5 sessions') + '</div>' +
+    '</div>';
+}
+
+// ─────────────────────────────────────────────
+//  RECOVERY WARNINGS
+// ─────────────────────────────────────────────
+function renderRecoveryWarnings() {
+  var el = document.getElementById('recoveryWarnings');
+  if (!el) return;
+
+  var warnings = [];
+  var ins = getWeekInsights();
+
+  // Rule 1: energy <65 for last 3+ entries
+  var recentEnergies = fitshiftHistory.slice(-3).map(function(e){return e.energy;});
+  if (recentEnergies.length >= 3 && recentEnergies.every(function(e){return e < 65;})) {
+    warnings.push({
+      type: 'red',
+      icon: '🔋',
+      title: 'Recovery debt building',
+      detail: '3+ days with energy below 65. Your body is accumulating fatigue. Reduce training volume by 30–40% and prioritise sleep tonight.'
+    });
+  }
+
+  // Rule 2: 2+ skipped workouts this week
+  if (ins.skip >= 2) {
+    warnings.push({
+      type: 'amber',
+      icon: '📉',
+      title: 'Reduce volume this week',
+      detail: ins.skip + ' workouts skipped. Your body is signalling it needs less. Drop 1–2 exercises per session and avoid new PRs.'
+    });
+  }
+
+  // Rule 3: sleep is poor (from S.sleep setting)
+  // We count "poor" logged days — use history length as proxy
+  if (S.sleep === 'poor') {
+    warnings.push({
+      type: 'red',
+      icon: '🚫',
+      title: 'Avoid HIIT sessions',
+      detail: 'Poor sleep quality detected. High-intensity training on poor sleep elevates cortisol and increases injury risk. Switch to Zone 2 or rest.'
+    });
+  } else if (S.sleep === 'low' && ins.adherencePct !== null && ins.adherencePct < 70) {
+    warnings.push({
+      type: 'amber',
+      icon: '⚠️',
+      title: 'Low sleep + missed sessions',
+      detail: 'Low sleep quality and below-70% adherence is a burnout pattern. Keep sessions short (≤40 min) and skip any HIIT this week.'
+    });
+  }
+
+  // Rule 4: declining trend warning
+  if (ins.trend === 'declining' && ins.avgEnergy !== null && ins.avgEnergy < 70) {
+    warnings.push({
+      type: 'amber',
+      icon: '🔁',
+      title: 'Burnout cycle detected',
+      detail: 'Energy declining over your last sessions. Consider a deload week: same frequency, 50% of normal volume. Consistency beats grinding.'
+    });
+  }
+
+  // All clear
+  if (warnings.length === 0 && ins.adherencePct !== null) {
+    warnings.push({
+      type: 'green',
+      icon: '✅',
+      title: 'Recovery looks good',
+      detail: 'No red flags this week. Keep logging daily to catch patterns early. Consistency is the compound interest of training.'
+    });
+  }
+
+  var html = '';
+  warnings.forEach(function(w) {
+    html += '<div class="recovery-card rc-' + w.type + '">';
+    html += '<div class="rc-icon">' + w.icon + '</div>';
+    html += '<div class="rc-body"><div class="rc-title">' + w.title + '</div><div class="rc-detail">' + w.detail + '</div></div>';
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// Hook into showScreen to render when switching to history
+var _origShowScreen = showScreen;
+showScreen = function(nm) {
+  _origShowScreen(nm);
+  if (nm === 'history') {
+    setTimeout(function() {
+      renderWorkoutLog();
+      renderInsights();
+      renderRecoveryWarnings();
+    }, 80);
+  }
+  if (nm === 'decider') {
+    setTimeout(initCheckinFromToday, 80);
+  }
+};
+
+// ─────────────────────────────────────────────
+//  DAILY CHECK-IN (Decider tab)
+// ─────────────────────────────────────────────
+var checkinWorkout = null; // 'done' | 'skip' | null
+var checkinSleep = null;   // 'poor' | 'low' | 'good' | 'great' | null
+
+function setCheckinWorkout(val) {
+  checkinWorkout = checkinWorkout === val ? null : val;
+  updateCheckinUI();
+}
+
+function setCheckinSleep(val) {
+  checkinSleep = val;
+  updateCheckinUI();
+}
+
+function updateCheckinUI() {
+  var doneEl = document.getElementById('checkin-done');
+  var skipEl = document.getElementById('checkin-skip');
+  var lbl    = document.getElementById('checkin-workout-label');
+
+  if (doneEl) {
+    doneEl.style.background = checkinWorkout === 'done' ? 'rgba(0,214,143,0.18)' : 'var(--bg3)';
+    doneEl.style.borderColor = checkinWorkout === 'done' ? 'var(--green)' : 'var(--border)';
+  }
+  if (skipEl) {
+    skipEl.style.background = checkinWorkout === 'skip' ? 'rgba(255,92,92,0.15)' : 'var(--bg3)';
+    skipEl.style.borderColor = checkinWorkout === 'skip' ? 'var(--red)' : 'var(--border)';
+  }
+  if (lbl) {
+    lbl.textContent = checkinWorkout === 'done' ? 'completed ✓' : checkinWorkout === 'skip' ? 'skipped' : 'not logged yet';
+    lbl.style.color = checkinWorkout === 'done' ? 'var(--green)' : checkinWorkout === 'skip' ? 'var(--red)' : 'var(--text3)';
+  }
+
+  ['poor','low','good','great'].forEach(function(s) {
+    var el = document.getElementById('csleep-' + s);
+    if (el) el.classList.toggle('active', checkinSleep === s);
+  });
+}
+
+function logDay() {
+  var todayKey = dateKey(new Date());
+
+  // Save workout status
+  if (checkinWorkout) {
+    workoutLog[todayKey] = checkinWorkout;
+    saveWorkoutLog();
+  }
+
+  // Save sleep to S and persist
+  if (checkinSleep) {
+    S.sleep = checkinSleep;
+    // sync the seg buttons in My Stats tab too
+    ['poor','low','good','great'].forEach(function(s) {
+      var el = document.querySelector('.seg-btn[onclick*="setSeg(\'sleep\',\'' + s + '\'"]');
+      if (el) el.classList.toggle('active', s === checkinSleep);
+    });
+  }
+
+  // Save energy + weight to history
+  saveFitShiftData();
+  updateHistoryData();
+
+  // Show toast
+  var toast = document.getElementById('logToast');
+  var btn   = document.getElementById('logDayBtn');
+  if (toast) { toast.style.display = 'block'; }
+  if (btn)   { btn.textContent = '✓ Logged!'; btn.style.background = '#00b87a'; }
+
+  setTimeout(function() {
+    if (toast) toast.style.display = 'none';
+    if (btn)   { btn.textContent = '📋 Log Today'; btn.style.background = 'var(--green)'; }
+  }, 2000);
+
+  // Show "already logged today" note
+  showAlreadyLogged(todayKey);
+}
+
+function showAlreadyLogged(todayKey) {
+  var el = document.getElementById('checkin-already-logged');
+  if (!el) return;
+  var entry = fitshiftHistory.find(function(e) {
+    var parts = e.date.split('/');
+    if (parts.length < 3) return false;
+    return parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0') === todayKey;
+  });
+  var wStatus = workoutLog[todayKey];
+  if (entry || wStatus) {
+    var parts = [];
+    if (entry) parts.push('⚡ ' + entry.energy + '  ·  ' + entry.weight + 'kg');
+    if (wStatus) parts.push(wStatus === 'done' ? '✅ workout done' : '❌ workout skipped');
+    if (entry && entry.sleep) parts.push('😴 ' + entry.sleep);
+    el.textContent = "Today's log: " + parts.join('  ·  ');
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function initCheckinFromToday() {
+  var todayKey = dateKey(new Date());
+  if (workoutLog[todayKey]) {
+    checkinWorkout = workoutLog[todayKey];
+  }
+  checkinSleep = S.sleep || null;
+  updateCheckinUI();
+  showAlreadyLogged(todayKey);
+}
+
+// ── Boot: all functions defined, now init ──
+loadHistoryData();
+loadFitShiftData();
+loadWorkoutLog();
+initCheckinFromToday();
+
+// ─────────────────────────────────────────────
+//  GOOGLE DRIVE SYNC
+// ─────────────────────────────────────────────
+var DRIVE_CLIENT_ID  = '840697015362-8nqkri9mkciqn5seao3gjnkmfim2bnkp.apps.googleusercontent.com';
+var DRIVE_SCOPE      = 'https://www.googleapis.com/auth/drive.appdata';
+var DRIVE_FILE_NAME  = 'fitshift-backup.json';
+var driveToken       = null;
+var driveFileId      = null;
+var driveTokenClient = null;
+
+function driveSetStatus(state, text) {
+  var dot = document.getElementById('driveDot');
+  var lbl = document.getElementById('driveStatusText');
+  var btn = document.getElementById('driveBtn');
+  if (!dot) return;
+  dot.className = 'drive-dot ' + (state || '');
+  lbl.textContent = text;
+  btn.textContent = state === 'connected' ? 'Sync Now' : state === 'syncing' ? 'Syncing…' : 'Connect Drive';
+  btn.disabled = state === 'syncing';
+}
+
+function driveAction() {
+  if (driveToken) { driveSave(); } else { driveSignIn(); }
+}
+
+function driveSignIn() {
+  if (!window.google) { driveSetStatus('error', 'Google script not loaded'); return; }
+  if (!driveTokenClient) {
+    driveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CLIENT_ID,
+      scope: DRIVE_SCOPE,
+      callback: function(resp) {
+        if (resp.error) { driveSetStatus('error', 'Sign-in failed'); return; }
+        driveToken = resp.access_token;
+        driveSetStatus('syncing', 'Connecting…');
+        driveFindOrCreate();
+      }
+    });
+  }
+  driveTokenClient.requestAccessToken();
+}
+
+function driveGetAllData() {
+  var now = new Date().toISOString();
+  try { localStorage.setItem('fitshift_savedAt', now); } catch(e) {}
+  return { S: S, history: fitshiftHistory, workoutLog: workoutLog, savedAt: now };
+}
+
+function driveRestoreAllData(data) {
+  if (data.S)          S = Object.assign(S, data.S);
+  if (data.history)    fitshiftHistory = data.history;
+  if (data.workoutLog) workoutLog = data.workoutLog;
+  // Persist locally — but do NOT call saveFitShiftData/updateHistoryData
+  // as that would create a fake log entry on every app open
+  try {
+    localStorage.setItem('fitshift_data_v4',    JSON.stringify(S));
+    localStorage.setItem('fitshift_history_v1', JSON.stringify(fitshiftHistory));
+    localStorage.setItem('fitshift_wlog_v1',    JSON.stringify(workoutLog));
+    if (data.savedAt) localStorage.setItem('fitshift_savedAt', data.savedAt);
+    if (S.energy)     localStorage.setItem('fitshift_energy',  S.energy);
+  } catch(e) {}
+  // Refresh UI only — no data writes
+  if(g('inp-age'))    g('inp-age').value    = S.age;
+  if(g('inp-height')) g('inp-height').value = S.height;
+  if(g('inp-weight')) g('inp-weight').value = S.weight;
+  if(g('inp-bf'))     g('inp-bf').value     = S.bf;
+  if(g('inp-muscle')) g('inp-muscle').value = S.muscle;
+  if(S.energy && g('energySlider')) {
+    g('energySlider').value = S.energy;
+    updateEnergy(S.energy);
+  }
+  calcAll();
+  updateHistoryChart();
+  renderWorkoutLog();
+  renderInsights();
+  renderRecoveryWarnings();
+  initCheckinFromToday();
+}
+
+function driveFindOrCreate() {
+  fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + DRIVE_FILE_NAME + '%22&fields=files(id,modifiedTime)', {
+    headers: { 'Authorization': 'Bearer ' + driveToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.files && data.files.length > 0) {
+      driveFileId = data.files[0].id;
+      driveLoad();
+    } else {
+      driveSave();
+    }
+  })
+  .catch(function() { driveSetStatus('error', 'Drive error — tap to retry'); });
+}
+
+function driveLoad() {
+  driveSetStatus('syncing', 'Loading from Drive…');
+  fetch('https://www.googleapis.com/drive/v3/files/' + driveFileId + '?alt=media', {
+    headers: { 'Authorization': 'Bearer ' + driveToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(driveData) {
+    var driveTime = driveData.savedAt ? new Date(driveData.savedAt).getTime() : 0;
+    var localTime = 0;
+    try {
+      var localMeta = localStorage.getItem('fitshift_savedAt');
+      if (localMeta) localTime = new Date(localMeta).getTime();
+    } catch(e) {}
+
+    if (driveTime > localTime) {
+      // Drive is newer — restore it
+      driveRestoreAllData(driveData);
+      driveSetStatus('connected', 'Restored from Drive');
+    } else {
+      // Local is newer — push local up to Drive
+      driveSetStatus('syncing', 'Uploading local data…');
+      driveSave();
+    }
+  })
+  .catch(function() { driveSetStatus('error', 'Load failed — tap to retry'); });
+}
+
+function driveSave() {
+  if (!driveToken) return;
+  driveSetStatus('syncing', 'Saving to Drive…');
+  var payload  = JSON.stringify(driveGetAllData());
+  var boundary = 'fitshift_bound';
+  var meta     = JSON.stringify({ name: DRIVE_FILE_NAME, parents: driveFileId ? undefined : ['appDataFolder'] });
+  var body     = '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + meta +
+                 '\r\n--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + payload +
+                 '\r\n--' + boundary + '--';
+  var url    = driveFileId
+    ? 'https://www.googleapis.com/upload/drive/v3/files/' + driveFileId + '?uploadType=multipart'
+    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  var method = driveFileId ? 'PATCH' : 'POST';
+
+  fetch(url, {
+    method: method,
+    headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+    body: body
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(f) {
+    if (f.id) driveFileId = f.id;
+    var now = new Date();
+    driveSetStatus('connected', 'Drive synced · ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0'));
+  })
+  .catch(function() { driveSetStatus('error', 'Save failed — tap to retry'); });
+}
+
+// Hook: auto-save to Drive after every Log Today tap
+var _origLogDay = logDay;
+logDay = function() {
+  _origLogDay();
+  if (driveToken) setTimeout(driveSave, 600);
+};
+
+// ── Auto-reconnect on startup ──
+// Tokens expire after 1h but we can silently refresh if the user
+// already granted access — no popup, no manual tap needed.
+function driveAutoReconnect() {
+  if (!window.google) {
+    // Google script not loaded yet — wait and retry
+    setTimeout(driveAutoReconnect, 500);
+    return;
+  }
+  // Restore saved file ID so we skip the search step
+  var savedFileId = localStorage.getItem('fitshift_drive_file_id');
+  if (savedFileId) driveFileId = savedFileId;
+
+  driveSetStatus('', 'Reconnecting Drive…');
+
+  driveTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: DRIVE_CLIENT_ID,
+    scope: DRIVE_SCOPE,
+    prompt: '',          // empty = silent refresh, no popup
+    callback: function(resp) {
+      if (resp.error) {
+        // Silent refresh failed — user needs to tap Connect Drive manually
+        driveSetStatus('', 'Not connected · tap to connect');
+        return;
+      }
+      driveToken = resp.access_token;
+      driveSetStatus('syncing', 'Reconnecting…');
+      // If we have a saved file ID, load directly — skip the search
+      if (driveFileId) {
+        driveLoad();
+      } else {
+        driveFindOrCreate();
+      }
+    }
+  });
+
+  // requestAccessToken with prompt:'' triggers silently if consent already given
+  driveTokenClient.requestAccessToken({ prompt: '' });
+}
+
+// Save file ID to localStorage whenever we get one
+var _origDriveSave = driveSave;
+driveSave = function() {
+  _origDriveSave();
+  // after save, cache the file ID
+  if (driveFileId) {
+    try { localStorage.setItem('fitshift_drive_file_id', driveFileId); } catch(e) {}
+  }
+};
+
+// Wait for Google script to load, then auto-reconnect
+window.addEventListener('load', function() {
+  setTimeout(driveAutoReconnect, 800);
+});
+</script>
+</body>
+</html>
